@@ -1,0 +1,116 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+}
+@media (min-width: 768px) {
+    .container {
+        width: 50%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.input-group label {
+    white-space: nowrap;
+    margin-right: 10px;
+    font-size: 16px;
+}
+.input-group input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.2s;
+}
+.input-group input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.buttons button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    flex-grow: 1; /* Add this line */
+    margin: 0 5px; /* Add this line */
+}
+.buttons button:first-child {
+    margin-left: 0; /* Add this line */
+}
+.buttons button:last-child {
+    margin-right: 0; /* Add this line */
+}
+.buttons button:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+.text-area {
+    flex-grow: 1;
+    resize: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.2s;
+}
+.text-area:focus {
+    outline: none;
+    border-color: #007bff;
+}
+/* Light theme styles */
+:root {
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --input-background: #ffffff;
+    --input-text: #000000;
+    --button-background: #f8f9fa;
+    --button-text: #000000;
+}
+/* Dark theme styles */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #1c1e21;
+        --text-color: #ffffff;
+        --input-background: #3a3b3c;
+        --input-text: #ffffff;
+        --button-background: #3a3b3c;
+        --button-text: #ffffff;
+    }
+}
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+.input-group input, .text-area {
+    background-color: var(--input-background);
+    color: var(--input-text);
+}
+.buttons button {
+    background-color: var(--button-background);
+    color: var(--button-text);
+}

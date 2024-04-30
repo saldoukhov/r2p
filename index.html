@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Right To Privacy</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function (registration) {
+                        console.log('Service Worker registered with scope:', registration.scope)
+                    }).catch(function (error) {
+                    console.log('Service Worker registration failed:', error)
+                })
+            })
+        }
+        const padTo16ByteBoundary = (data) => { // to obfuscate plaintext length
+            const paddingLength = Math.max(256 - data.length, (16 - (data.length % 16)) % 16)
+            const paddedArray = new Uint8Array(data.length + paddingLength)
+            paddedArray.set(data)
+            if (paddingLength > 0) {
+                paddedArray.fill(0x20, data.length)
+            }
+            return paddedArray
+        }
+        const enc = async (passPhrase, data) => {
+            const pfKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(passPhrase), 'PBKDF2', false, ['deriveKey'])
+            const salt = new Uint8Array(12)
+            crypto.getRandomValues(salt)
+            const derived = await crypto.subtle.deriveKey({
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 1000000,
+                hash: {name: 'SHA-256'}
+            }, pfKey, {name: 'AES-GCM', length: 256}, false, ['encrypt'])
+            const encryptedData = await crypto.subtle.encrypt({
+                name: 'AES-GCM',
+                iv: salt
+            }, derived, padTo16ByteBoundary(new TextEncoder().encode(data)))
+            const result = Uint8Array.of(...salt, ...new Uint8Array(encryptedData))
+            return btoa(String.fromCharCode(...result))
+        }
+        const dec = async (passPhrase, encryptedData) => {
+            const pfKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(passPhrase), "PBKDF2", false, ["deriveKey"])
+            const data = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0))
+            const salt = data.subarray(0, 12)
+            const encrypted = data.subarray(12)
+            const derived = await crypto.subtle.deriveKey({
+                name: "PBKDF2",
+                salt: salt,
+                iterations: 1000000,
+                hash: {name: "SHA-256"},
+            }, pfKey, {name: 'AES-GCM', length: 256}, false, ['decrypt'])
+            const decryptedData = await crypto.subtle.decrypt({
+                name: 'AES-GCM',
+                iv: salt
+            }, derived, encrypted)
+            return new TextDecoder().decode(decryptedData).trim()
+        }
+        const validateInputs = () => {
+            if (!document.getElementById('passphrase').value) {
+                alert('Passphrase is empty')
+                return false
+            }
+            if (!document.getElementById('content').value) {
+                alert('Content is empty')
+                return false
+            }
+            return true
+        }
+        const encrypt = async () => {
+            if (!validateInputs()) {
+                return
+            }
+            const content = document.getElementById('content')
+            try {
+                content.value = await enc(document.getElementById('passphrase').value, content.value)
+            } catch (e) {
+                alert(e)
+            }
+        }
+        const decrypt = async () => {
+            if (!validateInputs()) {
+                return
+            }
+            const content = document.getElementById('content')
+            try {
+                content.value = await dec(document.getElementById('passphrase').value, content.value)
+            } catch (e) {
+                alert(e)
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="input-group">
+        <label for="passphrase">Passphrase:</label>
+        <input type="password" id="passphrase" placeholder="Key to encrypt or decrypt content">
+    </div>
+    <div class="buttons">
+        <button type="button" onclick="encrypt()">Encrypt</button>
+        <button type="button" onclick="decrypt()">Decrypt</button>
+    </div>
+    <textarea class="text-area" id="content" placeholder="Your content to be encrypted or decrypted here..."></textarea>
+</div>
+</body>
+</html>
