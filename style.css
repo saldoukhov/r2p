@@ -27,6 +27,9 @@ body {
     align-items: center;
     margin-bottom: 20px;
 }
+.fingerprint {
+    margin-bottom: 20px;
+}
 .input-group label {
     white-space: nowrap;
     margin-right: 10px;
@@ -39,6 +42,16 @@ body {
     border-radius: 5px;
     border: 1px solid #ccc;
     transition: border-color 0.2s;
+}
+.input-group button {
+    width: 90px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    margin: 0 5px; /* Add this line */
 }
 .input-group input:focus {
     outline: none;
@@ -66,6 +79,10 @@ body {
     margin-right: 0; /* Add this line */
 }
 .buttons button:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+.input-group button:hover {
     background-color: #007bff;
     color: #ffffff;
 }
@@ -109,6 +126,10 @@ body {
 .input-group input, .text-area {
     background-color: var(--input-background);
     color: var(--input-text);
+}
+.input-group button {
+    background-color: var(--button-background);
+    color: var(--button-text);
 }
 .buttons button {
     background-color: var(--button-background);
