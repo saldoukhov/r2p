@@ -1,18 +1,21 @@
 # PWA to encrypt and decrypt text
 
 This is a very simple progressive web app that has zero dependencies and is easy to audit.
-The goal is to give the user a tool to encrypt or decrypt textual data, that can be sent or stored separately
+The goal is to give the user a tool to encrypt or decrypt textual data, that can be sent or stored separately.
 
-Remember that for decryption you need to know the passphrase used to encrypt the text
+Remember that for decryption you need to know the passphrase used to encrypt the text.
 
-Do not store the passphrase next to the encrypted text
+Do not store the passphrase next to the encrypted text.
 
-For sensitive data use longer passphrase (random password 18+characters of 6+ words)
+For sensitive data use longer passphrase (random password 18+characters of 6+ words).
 
 When you type the passphrase, the app gives you three words which are the "fingerprint" of the passphrase.
 The "fingerprint" is useful to make sure you typed the right passphrase without revealing the passphrase. 
 Also, if you store the fingerprint next to the encrypted text it will help you remember the passphrase you used.
-It is impossible to reconstruct the passphrase from the fingerprint. 
+It is impossible to reconstruct the passphrase from the fingerprint.
+
+Split and join give you the possibility to protect your data (encrypted or unencrypted) 
+by splitting it into 2 pieces that should be stored separately.
 
 ---
 To install, you need to serve the app. 

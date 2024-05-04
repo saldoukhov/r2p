@@ -27,10 +27,13 @@
             }
             return paddedArray
         }
+        const base64ToBytes = (data) => Uint8Array.from(atob(data), c => c.charCodeAt(0))
+        const bytesToBase64 = (data) => btoa(String.fromCharCode(...data))
+        const stringToBytes = (data) => new TextEncoder().encode(data)
+        const bytesToString = (data) => new TextDecoder().decode(data)
         const enc = async (passPhrase, data) => {
-            const pfKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(passPhrase), 'PBKDF2', false, ['deriveKey'])
-            const salt = new Uint8Array(12)
-            crypto.getRandomValues(salt)
+            const pfKey = await crypto.subtle.importKey('raw', stringToBytes(passPhrase), 'PBKDF2', false, ['deriveKey'])
+            const salt = crypto.getRandomValues(new Uint8Array(12))
             const derived = await crypto.subtle.deriveKey({
                 name: 'PBKDF2',
                 salt: salt,
@@ -40,13 +43,13 @@
             const encryptedData = await crypto.subtle.encrypt({
                 name: 'AES-GCM',
                 iv: salt
-            }, derived, padTo16ByteBoundary(new TextEncoder().encode(data)))
+            }, derived, padTo16ByteBoundary(stringToBytes(data)))
             const result = Uint8Array.of(...salt, ...new Uint8Array(encryptedData))
-            return btoa(String.fromCharCode(...result))
+            return bytesToBase64(result)
         }
         const dec = async (passPhrase, encryptedData) => {
-            const pfKey = await crypto.subtle.importKey("raw", new TextEncoder().encode(passPhrase), "PBKDF2", false, ["deriveKey"])
-            const data = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0))
+            const pfKey = await crypto.subtle.importKey("raw", stringToBytes(passPhrase), "PBKDF2", false, ["deriveKey"])
+            const data = base64ToBytes(encryptedData)
             const salt = data.subarray(0, 12)
             const encrypted = data.subarray(12)
             const derived = await crypto.subtle.deriveKey({
@@ -59,11 +62,11 @@
                 name: 'AES-GCM',
                 iv: salt
             }, derived, encrypted)
-            return new TextDecoder().decode(decryptedData).trim()
+            return bytesToString(decryptedData).trim()
         }
         const sha256 = async (data) => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
-        const calculateFingerprint = async (passphrase) => {
-            const hash = await sha256(new TextEncoder().encode(passphrase))
+        const calculateFingerprint = async (data) => {
+            const hash = await sha256(data)
             let hashBits = ''
             for (let i = 0; i < hash.byteLength; i++) {
                 hashBits += hash[i].toString(2).padStart(8, '0')
@@ -73,6 +76,44 @@
                 .slice(0, 3)
                 .map(x => bip39words[Number.parseInt(x, 2)])
                 .join("\x20")
+        }
+        const xor = (data, key) => {
+            for (let i = 0; i < data.length; i++) {
+                data[i] = data[i] ^ key[i]
+            }
+        }
+        const split = async (data) => {
+            const bytes = stringToBytes(data)
+            const oneTimePad = crypto.getRandomValues(new Uint8Array(bytes.length))
+            const fingerprint = await calculateFingerprint(oneTimePad)
+            xor(bytes, oneTimePad)
+            return {
+                part1: bytesToBase64(bytes),
+                part2: bytesToBase64(oneTimePad),
+                fingerprint
+            }
+        }
+        const join = (part1, part2) => {
+            const part1Bytes = base64ToBytes(part1)
+            const part2Bytes = base64ToBytes(part2)
+            xor(part1Bytes, part2Bytes)
+            return bytesToString(part1Bytes)
+        }
+
+        const updateFingerprint = async () => {
+            const fingerprint = await calculateFingerprint(stringToBytes(document.getElementById('passphrase').value))
+            document.getElementById('fingerprint').textContent = `Fingerprint: ${fingerprint}`
+        }
+        const revealPassphrase = () => {
+            const passphraseInput = document.getElementById("passphrase");
+            const toggleButton = document.getElementById("togglePassphrase");
+            if (passphraseInput.type === "password") {
+                passphraseInput.type = "text";
+                toggleButton.textContent = "Hide";
+            } else {
+                passphraseInput.type = "password";
+                toggleButton.textContent = "Show";
+            }
         }
         const validateInputs = () => {
             if (!document.getElementById('passphrase').value) {
@@ -107,19 +148,23 @@
                 alert(e)
             }
         }
-        const updateFingerprint = async () => {
-            const fingerprint = await calculateFingerprint(document.getElementById('passphrase').value)
-            document.getElementById('fingerprint').textContent = `Fingerprint: ${fingerprint}`
+        const splitContent = async () => {
+            try {
+                const content = document.getElementById('content')
+                const {part1, part2, fingerprint} = await split(content.value)
+                content.value = `${part1}\n\n${part2}`
+                document.getElementById('fingerprint').textContent = `Fingerprint: ${fingerprint}`
+            } catch (e) {
+                alert(e)
+            }
         }
-        const revealPassphrase = () => {
-            const passphraseInput = document.getElementById("passphrase");
-            const toggleButton = document.getElementById("togglePassphrase");
-            if (passphraseInput.type === "password") {
-                passphraseInput.type = "text";
-                toggleButton.textContent = "Hide";
-            } else {
-                passphraseInput.type = "password";
-                toggleButton.textContent = "Show";
+        const joinContent = () => {
+            try {
+                const content = document.getElementById('content')
+                const [part1, part2] = content.value.split('\n').filter(x => x)
+                content.value = join(part1, part2)
+            } catch (e) {
+                alert(e)
             }
         }
     </script>
@@ -136,6 +181,8 @@
     <div class="buttons">
         <button type="button" onclick="encrypt()">Encrypt</button>
         <button type="button" onclick="decrypt()">Decrypt</button>
+        <button type="button" onclick="splitContent()">Split</button>
+        <button type="button" onclick="joinContent()">Join</button>
     </div>
     <textarea class="text-area" id="content" placeholder="Your content to be encrypted or decrypted here..."></textarea>
 </div>
