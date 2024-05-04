@@ -21,5 +21,5 @@ by splitting it into 2 pieces that should be stored separately.
 To install, you need to serve the app. 
 Serve it locally with some static server (f.e. https://github.com/http-party/http-server)
 then make it public on the internet (f.e. https://ngrok.com), access the url, 
-install the APP (f.e. on phone add it from browser to desktop). 
+install the app (f.e. on phone add it from browser to desktop). 
 Then you can stop ngrok and your local server, app will still be available.
