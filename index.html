@@ -133,6 +133,7 @@
             const content = document.getElementById('content')
             try {
                 content.value = await enc(document.getElementById('passphrase').value, content.value)
+                document.getElementById('status').textContent = `Size: ${content.value.length}`
             } catch (e) {
                 alert(e)
             }
@@ -185,6 +186,7 @@
         <button type="button" onclick="joinContent()">Join</button>
     </div>
     <textarea class="text-area" id="content" placeholder="Your content to be encrypted or decrypted here..."></textarea>
+    <div class="fingerprint" id="status">Size:</div>
 </div>
 </body>
 </html>
