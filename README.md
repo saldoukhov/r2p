@@ -1,6 +1,6 @@
 # PWA to encrypt and decrypt text
 
-![R2P screenshot](https://raw.githubusercontent.com/saldoukhov/media/main/r2p/screenshot.jpeg)
+![R2P in action](https://raw.githubusercontent.com/saldoukhov/media/main/r2p/r2p_demo.gif)
 
 This is a very simple progressive web app that has zero dependencies and is easy to audit.
 The goal is to give the user a tool to encrypt or decrypt textual data, that can be sent or stored separately.
