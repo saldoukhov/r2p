@@ -1,5 +1,5 @@
 const CACHE_NAME = 'r2p';
-const urlsToCache = ['/', '/index.html', '/style.css'];
+const urlsToCache = ['index.html', 'style.css'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
