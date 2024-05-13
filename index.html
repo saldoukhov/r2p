@@ -164,6 +164,7 @@
                 const content = document.getElementById('content')
                 const [part1, part2] = content.value.split('\n').filter(x => x)
                 content.value = join(part1, part2)
+                updateFingerprint()
             } catch (e) {
                 alert(e)
             }
