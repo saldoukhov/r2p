@@ -1,5 +1,5 @@
 const CACHE_NAME = 'r2p';
-const urlsToCache = ['./', './index.html', './style.css'];
+const urlsToCache = ['./', './index.html', './style.css', './manifest.json'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -8,18 +8,15 @@ self.addEventListener('install', (event) => {
                 console.log('Opened cache');
                 return cache.addAll(urlsToCache);
             })
-    );
-});
+    )
+})
 
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
-                    if (response) {
-                        return response;
-                    }
-                    return fetch(event.request);
+                    if (response) return response;
                 }
             )
-    );
-});
+    )
+})
